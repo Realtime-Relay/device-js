@@ -144,9 +144,10 @@ export class NatsTransport {
                 try {
                     msg.working();
                     const data = decode(msg.data);
-                    callback(data, msg);
+                    callback(data);
+                    msg.ack();
                 } catch (err) {
-                    // skip malformed messages
+                    msg.nak(5000);
                 }
             },
         });
@@ -170,8 +171,7 @@ export class NatsTransport {
                 try {
                     const data = msg.json()
                     callback(data, msg);
-                } catch (err) {
-                    console.log(err)
+                } catch (_) {
                     // skip malformed messages
                 }
             }
@@ -202,14 +202,11 @@ export class NatsTransport {
             return false;
         }
 
-        console.log(subject)
-
         const encoded = encode(data);
         try {
             const ack = await this.#jetstream.publish(subject, encoded);
             return ack != null;
-        } catch (err) {
-            console.log(err)
+        } catch (_) {
             return false;
         }
     }
@@ -263,7 +260,7 @@ export class NatsTransport {
         const subject = SubjectBuilder.schemaGet(this.#orgId);
         try {
             const response = await this.request(subject, { id: this.#deviceId });
-            this.#schema = response.data.schema ?? response;
+            this.#schema = response.data?.schema ?? null;
         } catch (_) {
             this.#schema = null;
         }

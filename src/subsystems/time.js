@@ -11,7 +11,7 @@ export class TimeManager {
 
     #transport;
     #active = false;
-    #offsetUs = 0;
+    #offsetMs = 0;
     #lastSyncAt = 0;
     #timezone = null;
 
@@ -45,26 +45,26 @@ export class TimeManager {
 
         const response = await client.syncTime();
 
-        // response.time is NTP server time as Date, convert to Unix µs
-        const ntpUnixUs = response.time.getTime();
-        const localUs = Date.now();
+        // response.time is NTP server time as Date, getTime() returns ms
+        const ntpMs = response.time.getTime();
+        const localMs = Date.now();
 
-        this.#offsetUs = ntpUnixUs - localUs;
+        this.#offsetMs = ntpMs - localMs;
         this.#lastSyncAt = Date.now();
     }
 
     now() {
-        // return µs-precision corrected timestamp
-        return Date.now() + this.#offsetUs;
+        // return ms-precision corrected timestamp
+        return Date.now() + this.#offsetMs;
     }
 
     toDate(timestamp) {
-        // timestamp is in µs, Date expects ms
+        // timestamp is in ms
         return new Date(timestamp);
     }
 
     toTimestamp(date) {
-        // return µs
+        // return ms
         return date.getTime();
     }
 
