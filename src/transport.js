@@ -20,12 +20,6 @@ const NATS_SERVERS_PRODUCTION = [
     'tls://api.relay-x.io:4223',
 ];
 
-const NATS_SERVERS_TEST = [
-    'nats://0.0.0.0:4221',
-    'nats://0.0.0.0:4222',
-    'nats://0.0.0.0:4223',
-];
-
 export class NatsTransport {
 
     #config;
@@ -43,6 +37,7 @@ export class NatsTransport {
     #commandQueueStreamName = null;
     #offlineMessageBuffer = [];
     #schema = null;
+    #reconnecting = false;
 
     constructor(config) {
         this.#config = config;
@@ -57,9 +52,7 @@ export class NatsTransport {
         const credsFile = this.#buildCredsFile(this.#config.api_key, this.#config.secret);
         const credsAuth = credsAuthenticator(new TextEncoder().encode(credsFile));
 
-        const servers = this.#config.mode === 'production'
-            ? NATS_SERVERS_PRODUCTION
-            : NATS_SERVERS_TEST;
+        const servers = NATS_SERVERS_PRODUCTION
 
         try {
             this.#natsClient = await connect({
@@ -67,7 +60,9 @@ export class NatsTransport {
                 noEcho: true,
                 reconnect: true,
                 maxReconnectAttempts: 1200,
-                reconnectTimeWait: 1000,
+                reconnectTimeWait: 500,
+                maxPingOut: 2,
+                pingInterval: 5000,
                 authenticator: credsAuth,
                 token: this.#config.api_key,
             });
@@ -78,6 +73,12 @@ export class NatsTransport {
             this.#decodeApiKey(this.#config.api_key);
 
             this.#startStatusIterator();
+
+            this.#natsClient.closed().then(() => {
+                this.#connected = false;
+                this.#reconnecting = false;
+                this._emitStatus({ type: TransportStatus.DISCONNECTED });
+            });
 
             this.#connected = true;
 
@@ -280,16 +281,19 @@ export class NatsTransport {
                 switch (s.type) {
                     case Events.Disconnect:
                         this.#connected = false;
-                        this._emitStatus({ type: TransportStatus.DISCONNECTED });
                         break;
                     case Events.Reconnect:
                         this.#connected = true;
+                        this.#reconnecting = false;
                         this.#flushOfflineBuffer();
                         this._emitStatus({ type: TransportStatus.RECONNECTED });
                         break;
                     case DebugEvents.Reconnecting:
                         this.#connected = false;
-                        this._emitStatus({ type: TransportStatus.RECONNECTING });
+                        if (!this.#reconnecting) {
+                            this.#reconnecting = true;
+                            this._emitStatus({ type: TransportStatus.RECONNECTING });
+                        }
                         break;
                     case Events.Error:
                         if (s.data === 'NATS_PROTOCOL_ERR') {
@@ -299,6 +303,7 @@ export class NatsTransport {
                         break;
                 }
             }
+
         })();
     }
 
