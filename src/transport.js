@@ -108,7 +108,6 @@ export class NatsTransport {
         }
 
         this.#connected = false;
-        this._emitStatus({ type: TransportStatus.DISCONNECTED });
         return true;
     }
 
