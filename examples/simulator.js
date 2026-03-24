@@ -29,6 +29,15 @@ function getTemperature(elapsed) {
     return 70 + jitter;                          // back to normal
 }
 
+function getHumidity(elapsed) {
+    const jitter = (Math.random() - 0.5) * 2; // ±1°C noise
+
+    if (elapsed < 5)  return 60 + jitter;       // normal
+    if (elapsed < 65) return 75 + jitter;       // breach 60s → fire
+    if (elapsed < 80) return 60 + jitter;       // recovery 15s → resolved
+    return 60 + jitter;                          // back to normal
+}
+
 async function main() {
     const connected = await device.connect();
     if (!connected) {
@@ -45,7 +54,7 @@ async function main() {
     const interval = setInterval(async () => {
         const elapsed = (Date.now() - startTime) / 1000;
         const temperature = +getTemperature(elapsed).toFixed(2);
-        const humidity = +(30 + Math.random() * 50).toFixed(2);
+        const humidity = +getHumidity(elapsed).toFixed(2);
 
         const [tempOk, humOk] = await Promise.all([
             device.telemetry.publish('temperature', temperature),

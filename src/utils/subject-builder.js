@@ -39,6 +39,6 @@ export const SubjectBuilder = {
 
     event(orgId, env, deviceId, eventName) {
         validateToken(eventName, 'eventName');
-        return `${orgId}.${env}.event.${deviceId}.${eventName}`;
+        return `${orgId}.${env}.events.${deviceId}.${eventName}`;
     },
 };
