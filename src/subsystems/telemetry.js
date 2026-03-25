@@ -31,7 +31,7 @@ export class TelemetryManager {
                 throw new ValidationError(`metric '${metric}' is not defined in the device schema`);
             }
 
-            const expectedType = schema[metric];
+            const expectedType = schema[metric]?.type;
             const actualType = getReadingType(reading);
 
             if (actualType !== null && actualType !== expectedType) {
