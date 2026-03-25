@@ -33,6 +33,22 @@ export class NatsTransport {
     #orgId = null;
     #deviceId = null;
     #env = null;
+
+    #logger = {
+        error: (msg, err) => {
+            if (this.#env === 'test') {
+                console.error(`[relay-device-sdk] ERROR: ${msg}`);
+                if (err) console.error(err);
+            }
+        },
+        warn: (msg) => {
+            if (this.#env === 'test') console.warn(`[relay-device-sdk] WARN: ${msg}`);
+        },
+        info: (msg) => {
+            if (this.#env === 'test') console.log(`[relay-device-sdk] INFO: ${msg}`);
+        },
+    };
+
     #streamName = null;
     #commandQueueStreamName = null;
     #offlineMessageBuffer = [];
@@ -172,7 +188,7 @@ export class NatsTransport {
                     const data = msg.json()
                     callback(data, msg);
                 } catch (_) {
-                    // skip malformed messages
+                    this.#logger.error('Failed to parse core message', _);
                 }
             }
         })();
@@ -189,7 +205,7 @@ export class NatsTransport {
             try {
                 await consumer.delete();
             } catch (_) {
-                // consumer may already be gone
+                this.#logger.error('Failed to delete consumer', _);
             }
         }
 
@@ -207,6 +223,7 @@ export class NatsTransport {
             const ack = await this.#jetstream.publish(subject, encoded);
             return ack != null;
         } catch (_) {
+            this.#logger.error('Failed to publish', _);
             return false;
         }
     }
@@ -262,6 +279,7 @@ export class NatsTransport {
             const response = await this.request(subject, { id: this.#deviceId });
             this.#schema = response.data?.schema ?? null;
         } catch (_) {
+            this.#logger.error('Failed to fetch schema', _);
             this.#schema = null;
         }
     }
@@ -320,7 +338,7 @@ export class NatsTransport {
             try {
                 await consumer.delete();
             } catch (_) {
-                // consumer may already be gone
+                this.#logger.error('Failed to delete consumer on cleanup', _);
             }
         }
         this.#consumerMap = {};

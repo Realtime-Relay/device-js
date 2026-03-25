@@ -41,16 +41,20 @@ export class TimeManager {
     async init() {
         this.#requireConnection();
 
-        const client = new NtpClient(NTP_SERVER, NTP_PORT);
+        try {
+            const client = new NtpClient(NTP_SERVER, NTP_PORT);
 
-        const response = await client.syncTime();
+            const response = await client.syncTime();
 
-        // response.time is NTP server time as Date, getTime() returns ms
-        const ntpMs = response.time.getTime();
-        const localMs = Date.now();
+            // response.time is NTP server time as Date, getTime() returns ms
+            const ntpMs = response.time.getTime();
+            const localMs = Date.now();
 
-        this.#offsetMs = ntpMs - localMs;
-        this.#lastSyncAt = Date.now();
+            this.#offsetMs = ntpMs - localMs;
+            this.#lastSyncAt = Date.now();
+        } catch (err) {
+            // NTP sync failed — fall back to local time silently
+        }
     }
 
     now() {
