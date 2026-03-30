@@ -7,13 +7,13 @@ Official JavaScript SDK for connecting IoT devices to the RelayX platform.
 ## Installation
 
 ```bash
-npm install @relayx/device-sdk
+npm install @relay-x/device-sdk
 ```
 
 ## Quick Start
 
 ```js
-import { RelayDevice } from "@relayx/device-sdk";
+import { RelayDevice } from "@relay-x/device-sdk";
 
 const device = new RelayDevice({
   api_key: "<YOUR_API_KEY>",
@@ -175,7 +175,7 @@ import {
   DuplicateListenerError, // rpc.listen() or command.listen() called twice for same name
   ValidationError, // Invalid arguments or schema mismatch
   TimeoutError, // Request/reply timed out
-} from "@relayx/device-sdk";
+} from "@relay-x/device-sdk";
 ```
 
 ## Offline Behavior
@@ -193,7 +193,7 @@ npm test
 The SDK is designed for full unit testability. All subsystems accept a transport dependency that can be mocked:
 
 ```js
-import { RelayDevice } from "@relayx/device-sdk";
+import { RelayDevice } from "@relay-x/device-sdk";
 
 const mockTransport = {
   /* mock methods */
