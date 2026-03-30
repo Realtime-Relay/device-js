@@ -1,0 +1,37 @@
+{
+  "name": "@relay-x/device-sdk",
+  "version": "0.1.1",
+  "description": "A SDK to deploy on devices to connect to the RelayX Network",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Realtime-Relay/relayx-device-sdk-js.git"
+  },
+  "keywords": [
+    "relayx",
+    "device-sdk",
+    "iot"
+  ],
+  "author": "RelayX",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Realtime-Relay/relayx-device-sdk-js/issues"
+  },
+  "homepage": "https://github.com/Realtime-Relay/relayx-device-sdk-js#readme",
+  "dependencies": {
+    "@msgpack/msgpack": "^3.1.3",
+    "@nats-io/jetstream": "3.0.0-35",
+    "@nats-io/kv": "3.2.0",
+    "nats": "2.29.3",
+    "nats-jwt": "^0.0.9",
+    "ntp-time": "^2.1.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.0"
+  }
+}
