@@ -1,38 +1,40 @@
 # RelayX Device SDK for JavaScript
 
-Official JavaScript SDK for connecting IoT devices to the RelayX Network.
+Official JavaScript SDK for connecting IoT devices to the RelayX platform.
+
+> **[View Full Documentation →](https://docs.relay-x.io/device-sdk/overview)**
 
 ## Installation
 
 ```bash
-npm install relayx-device-js
+npm install @relayx/device-sdk
 ```
 
 ## Quick Start
 
 ```js
-import { RelayDevice } from 'relayx-device-js';
+import { RelayDevice } from "@relayx/device-sdk";
 
 const device = new RelayDevice({
-  api_key: '<YOUR_API_KEY>',
-  secret: '<YOUR_SECRET>',
+  api_key: "<YOUR_API_KEY>",
+  secret: "<YOUR_SECRET>",
   mode: RelayDevice.PRODUCTION_MODE, // or RelayDevice.TEST_MODE
 });
 
 await device.connect();
 
 // Publish telemetry
-await device.telemetry.publish('temperature', 22.5);
+await device.telemetry.publish("temperature", 22.5);
 
 // Listen for RPC calls
-await device.rpc.listen('reboot', (req) => {
-  console.log('Reboot requested:', req.payload);
-  req.respond({ status: 'rebooting' });
+await device.rpc.listen("reboot", (req) => {
+  console.log("Reboot requested:", req.payload);
+  req.respond({ status: "rebooting" });
 });
 
 // Listen for commands
-await device.command.listen('firmware_update', (msg) => {
-  console.log('Firmware update:', msg.payload);
+await device.command.listen("firmware_update", (msg) => {
+  console.log("Firmware update:", msg.payload);
   msg.ack();
 });
 
@@ -44,9 +46,9 @@ await device.disconnect();
 
 ```js
 const device = new RelayDevice({
-  api_key: '<YOUR_API_KEY>',   // JWT issued by RelayX
-  secret: '<YOUR_SECRET>',      // NKEY seed
-  mode: 'production',           // 'production' | 'test'
+  api_key: "<YOUR_API_KEY>", // JWT issued by RelayX
+  secret: "<YOUR_SECRET>", // NKEY seed
+  mode: "production", // 'production' | 'test'
 });
 ```
 
@@ -57,13 +59,13 @@ The `api_key` is a NATS JWT that encodes your `orgId` and `deviceId`. These are 
 ### Connection
 
 ```js
-await device.connect();    // returns true on success, false if already connected or failed
+await device.connect(); // returns true on success, false if already connected or failed
 await device.disconnect(); // drains NATS connection, cleans up consumers
 
 // Listen for connection status changes
 device.connection.listeners((event) => {
   // event.type: 'connected' | 'disconnected' | 'reconnecting' | 'reconnected' | 'auth_failed'
-  console.log('Status:', event.type);
+  console.log("Status:", event.type);
 });
 ```
 
@@ -72,10 +74,10 @@ device.connection.listeners((event) => {
 Fire-and-forget sensor data publishing. Readings are validated against the device schema fetched on connect.
 
 ```js
-await device.telemetry.publish('temperature', 22.5);        // number
-await device.telemetry.publish('status', 'online');          // string
-await device.telemetry.publish('active', true);              // boolean
-await device.telemetry.publish('metadata', { fw: '1.2' });  // json
+await device.telemetry.publish("temperature", 22.5); // number
+await device.telemetry.publish("status", "online"); // string
+await device.telemetry.publish("active", true); // boolean
+await device.telemetry.publish("metadata", { fw: "1.2" }); // json
 ```
 
 Each message is published with a server-synced timestamp.
@@ -84,12 +86,12 @@ Each message is published with a server-synced timestamp.
 
 ### Remote Procedure Calls (RPC)
 
-Register handlers for incoming RPC calls. 
+Register handlers for incoming RPC calls.
 
 ```js
 // Register a handler
-await device.rpc.listen('get_status', (req) => {
-  console.log('Payload:', req.payload);
+await device.rpc.listen("get_status", (req) => {
+  console.log("Payload:", req.payload);
 
   // Respond with success
   req.respond({ uptime: 12345 });
@@ -99,7 +101,7 @@ await device.rpc.listen('get_status', (req) => {
 });
 
 // Unregister
-await device.rpc.off('get_status');
+await device.rpc.off("get_status");
 ```
 
 Duplicate listeners for the same name throw `DuplicateListenerError`.
@@ -109,13 +111,13 @@ Duplicate listeners for the same name throw `DuplicateListenerError`.
 One-way commands delivered for long running tasks and that do not require a status update
 
 ```js
-await device.command.listen('firmware_update', (msg) => {
-  console.log('Command:', msg.payload);
-  
+await device.command.listen("firmware_update", (msg) => {
+  console.log("Command:", msg.payload);
+
   // Process based on data...
 });
 
-await device.command.off('firmware_update');
+await device.command.off("firmware_update");
 ```
 
 ### Config
@@ -128,7 +130,7 @@ const config = await device.config.get();
 console.log(config);
 
 // Update config
-const success = await device.config.set({ interval: 10000, name: 'sensor-1' });
+const success = await device.config.set({ interval: 10000, name: "sensor-1" });
 ```
 
 ### Events
@@ -136,7 +138,10 @@ const success = await device.config.set({ interval: 10000, name: 'sensor-1' });
 Fire-and-forget event publishing of events (fault codes, etc)
 
 ```js
-await device.event.send('door_opened', { door_id: 'front', timestamp: Date.now() });
+await device.event.send("door_opened", {
+  door_id: "front",
+  timestamp: Date.now(),
+});
 ```
 
 ### Time
@@ -157,7 +162,7 @@ const date = device.time.toDate(now);
 const ts = device.time.toTimestamp(new Date());
 
 // Set timezone for display
-device.time.setTimezone('America/New_York');
+device.time.setTimezone("America/New_York");
 ```
 
 ## Error Handling
@@ -166,11 +171,11 @@ The SDK exports four error types:
 
 ```js
 import {
-  NotConnectedError,       // Operation attempted while disconnected
-  DuplicateListenerError,  // rpc.listen() or command.listen() called twice for same name
-  ValidationError,         // Invalid arguments or schema mismatch
-  TimeoutError,            // Request/reply timed out
-} from 'relayx-device-js';
+  NotConnectedError, // Operation attempted while disconnected
+  DuplicateListenerError, // rpc.listen() or command.listen() called twice for same name
+  ValidationError, // Invalid arguments or schema mismatch
+  TimeoutError, // Request/reply timed out
+} from "@relayx/device-sdk";
 ```
 
 ## Offline Behavior
@@ -188,11 +193,13 @@ npm test
 The SDK is designed for full unit testability. All subsystems accept a transport dependency that can be mocked:
 
 ```js
-import { RelayDevice } from 'relayx-device-js';
+import { RelayDevice } from "@relayx/device-sdk";
 
-const mockTransport = { /* mock methods */ };
+const mockTransport = {
+  /* mock methods */
+};
 const device = RelayDevice._createForTest(
-  { api_key: 'test', secret: 'test', mode: 'test' },
+  { api_key: "test", secret: "test", mode: "test" },
   mockTransport,
 );
 ```
