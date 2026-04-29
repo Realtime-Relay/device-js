@@ -55,21 +55,21 @@ function getHumidity(elapsed) {
   const t = elapsed % TOTAL_CYCLE;
 
   if (t < 10) {
-    return (t / 10) * 40;
+    return 60 + Math.random() * 4;
   }
   if (t < 18) {
-    return 38 + Math.random() * 4;
+    return 70 + Math.random() * 4;
   }
   if (t < 24) {
     const progress = (t - 18) / 6;
-    return 40 + progress * 25;
+    return 80 + progress * 25;
   }
   if (t < 32) {
     return 60 + Math.random() * 10;
   }
   if (t < 42) {
     const progress = (t - 32) / 10;
-    return 65 + progress * 15;
+    return 50 + progress * 15;
   }
   return 80;
 }
@@ -90,37 +90,37 @@ async function main() {
   let tick = 0;
 
   const interval = setInterval(async () => {
-    // const elapsed = (Date.now() - startTime) / 1000;
-    // const temperature = +getTemperature(elapsed).toFixed(2);
-    // const humidity = +getHumidity(elapsed).toFixed(2);
+    const elapsed = (Date.now() - startTime) / 1000;
+    const temperature = +getTemperature(elapsed).toFixed(2);
+    const humidity = +getHumidity(elapsed).toFixed(2);
 
-    // const [tempOk, humOk] = await Promise.all([
-    //   device.telemetry.publish("temperature", temperature),
-    //   device.telemetry.publish("humidity", humidity),
-    // ]);
+    const [tempOk, humOk] = await Promise.all([
+      // device.telemetry.publish("temperature", temperature),
+      device.telemetry.publish("humidity", humidity),
+    ]);
 
-    // const t = elapsed % TOTAL_CYCLE;
-    // const cycle = Math.floor(elapsed / TOTAL_CYCLE) + 1;
-    // const phase =
-    //   t < 10
-    //     ? "RAMP 0→50"
-    //     : t < 18
-    //       ? "HOLD ~49"
-    //       : t < 24
-    //         ? "RAMP 50→80"
-    //         : t < 32
-    //           ? "HOLD ~78"
-    //           : "RAMP 80→100";
+    const t = elapsed % TOTAL_CYCLE;
+    const cycle = Math.floor(elapsed / TOTAL_CYCLE) + 1;
+    const phase =
+      t < 10
+        ? "RAMP 0→50"
+        : t < 18
+          ? "HOLD ~49"
+          : t < 24
+            ? "RAMP 50→80"
+            : t < 32
+              ? "HOLD ~78"
+              : "RAMP 80→100";
 
-    // console.log(
-    //   `[${elapsed.toFixed(0).padStart(3)}s] [C${cycle}] [${phase.padEnd(12)}] ` +
-    //     `temp=${temperature}°C (${tempOk ? "sent" : "buff"}) | ` +
-    //     `humidity=${humidity}% (${humOk ? "sent" : "buff"})`,
-    // );
+    console.log(
+      `[${elapsed.toFixed(0).padStart(3)}s] [C${cycle}] [${phase.padEnd(12)}] ` +
+        `temp=${temperature}°C (${tempOk ? "sent" : "buff"}) | ` +
+        `humidity=${humidity}% (${humOk ? "sent" : "buff"})`,
+    );
 
-    await device.event.send("reboot_device", {
-      "hey": "world"
-    })
+    // await device.event.send("reboot_device", {
+    //   "hey": "world"
+    // })
 
     tick++;
   }, 200);
