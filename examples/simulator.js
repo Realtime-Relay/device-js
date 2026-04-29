@@ -90,36 +90,40 @@ async function main() {
   let tick = 0;
 
   const interval = setInterval(async () => {
-    const elapsed = (Date.now() - startTime) / 1000;
-    const temperature = +getTemperature(elapsed).toFixed(2);
-    const humidity = +getHumidity(elapsed).toFixed(2);
+    // const elapsed = (Date.now() - startTime) / 1000;
+    // const temperature = +getTemperature(elapsed).toFixed(2);
+    // const humidity = +getHumidity(elapsed).toFixed(2);
 
-    const [tempOk, humOk] = await Promise.all([
-      device.telemetry.publish("temperature", temperature),
-      device.telemetry.publish("humidity", humidity),
-    ]);
+    // const [tempOk, humOk] = await Promise.all([
+    //   device.telemetry.publish("temperature", temperature),
+    //   device.telemetry.publish("humidity", humidity),
+    // ]);
 
-    const t = elapsed % TOTAL_CYCLE;
-    const cycle = Math.floor(elapsed / TOTAL_CYCLE) + 1;
-    const phase =
-      t < 10
-        ? "RAMP 0→50"
-        : t < 18
-          ? "HOLD ~49"
-          : t < 24
-            ? "RAMP 50→80"
-            : t < 32
-              ? "HOLD ~78"
-              : "RAMP 80→100";
+    // const t = elapsed % TOTAL_CYCLE;
+    // const cycle = Math.floor(elapsed / TOTAL_CYCLE) + 1;
+    // const phase =
+    //   t < 10
+    //     ? "RAMP 0→50"
+    //     : t < 18
+    //       ? "HOLD ~49"
+    //       : t < 24
+    //         ? "RAMP 50→80"
+    //         : t < 32
+    //           ? "HOLD ~78"
+    //           : "RAMP 80→100";
 
-    console.log(
-      `[${elapsed.toFixed(0).padStart(3)}s] [C${cycle}] [${phase.padEnd(12)}] ` +
-        `temp=${temperature}°C (${tempOk ? "sent" : "buff"}) | ` +
-        `humidity=${humidity}% (${humOk ? "sent" : "buff"})`,
-    );
+    // console.log(
+    //   `[${elapsed.toFixed(0).padStart(3)}s] [C${cycle}] [${phase.padEnd(12)}] ` +
+    //     `temp=${temperature}°C (${tempOk ? "sent" : "buff"}) | ` +
+    //     `humidity=${humidity}% (${humOk ? "sent" : "buff"})`,
+    // );
+
+    await device.event.send("reboot_device", {
+      "hey": "world"
+    })
 
     tick++;
-  }, 20);
+  }, 200);
 
   device.rpc.listen("reboot_device", (req) => {
     console.log("Rebooting....");

@@ -30,10 +30,16 @@ export const TransportStatus = Object.freeze({
   RECONNECT_FAILED: "reconnect_failed",
 });
 
+// const NATS_SERVERS_PRODUCTION = [
+//   "tls://api.relay-x.io:4221",
+//   "tls://api.relay-x.io:4222",
+//   "tls://api.relay-x.io:4223",
+// ];
+
 const NATS_SERVERS_PRODUCTION = [
-  "tls://api.relay-x.io:4221",
-  "tls://api.relay-x.io:4222",
-  "tls://api.relay-x.io:4223",
+  "nats://0.0.0.0:4221",
+  "nats://0.0.0.0:4222",
+  "nats://0.0.0.0:4223",
 ];
 
 export class NatsTransport {

@@ -42,4 +42,13 @@ export const SubjectBuilder = {
     validateToken(eventName, "eventName");
     return `${orgId}.${env}.events.${deviceId}.${eventName}`;
   },
+
+  log(orgId, env, deviceId, type) {
+    if (type !== "info" && type !== "warn" && type !== "error") {
+      throw new ValidationError(
+        `log type must be one of 'info', 'warn', 'error'`,
+      );
+    }
+    return `${orgId}.${env}.logs.${deviceId}.${type}`;
+  },
 };
