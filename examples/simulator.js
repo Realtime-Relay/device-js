@@ -55,21 +55,21 @@ function getHumidity(elapsed) {
   const t = elapsed % TOTAL_CYCLE;
 
   if (t < 10) {
-    return (t / 10) * 40;
+    return 60 + Math.random() * 4;
   }
   if (t < 18) {
-    return 38 + Math.random() * 4;
+    return 70 + Math.random() * 4;
   }
   if (t < 24) {
     const progress = (t - 18) / 6;
-    return 40 + progress * 25;
+    return 80 + progress * 25;
   }
   if (t < 32) {
     return 60 + Math.random() * 10;
   }
   if (t < 42) {
     const progress = (t - 32) / 10;
-    return 65 + progress * 15;
+    return 50 + progress * 15;
   }
   return 80;
 }
@@ -95,7 +95,7 @@ async function main() {
     const humidity = +getHumidity(elapsed).toFixed(2);
 
     const [tempOk, humOk] = await Promise.all([
-      device.telemetry.publish("temperature", temperature),
+      // device.telemetry.publish("temperature", temperature),
       device.telemetry.publish("humidity", humidity),
     ]);
 
@@ -118,8 +118,12 @@ async function main() {
         `humidity=${humidity}% (${humOk ? "sent" : "buff"})`,
     );
 
+    // await device.event.send("reboot_device", {
+    //   "hey": "world"
+    // })
+
     tick++;
-  }, 20);
+  }, 200);
 
   device.rpc.listen("reboot_device", (req) => {
     console.log("Rebooting....");

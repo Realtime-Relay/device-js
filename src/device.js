@@ -6,6 +6,7 @@ import { TelemetryManager } from "./subsystems/telemetry.js";
 import { ConfigManager } from "./subsystems/config.js";
 import { EventManager } from "./subsystems/event.js";
 import { TimeManager } from "./subsystems/time.js";
+import { LogManager } from "./subsystems/log.js";
 
 export class RelayDevice {
   static TEST_MODE = "test";
@@ -31,6 +32,7 @@ export class RelayDevice {
     this.telemetry = new TelemetryManager(this.#transport, this.time);
     this.config = new ConfigManager(this.#transport);
     this.event = new EventManager(this.#transport, this.time);
+    this.log = new LogManager(this.#transport, this.time);
     this.connection = {
       listeners: (callback) => this.#transport.onStatus(callback),
     };
@@ -45,6 +47,7 @@ export class RelayDevice {
   }
 
   async disconnect() {
+    await this.log.shutdown();
     return this.#transport.disconnect();
   }
 }

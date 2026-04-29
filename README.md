@@ -26,6 +26,10 @@ await device.connect();
 // Publish telemetry
 await device.telemetry.publish("temperature", 22.5);
 
+// Emit logs (batched to NATS, mirrored to console)
+device.log.info("device booted");
+device.log.warn("disk usage at", 87, "%");
+
 // Listen for RPC calls
 await device.rpc.listen("reboot", (req) => {
   console.log("Reboot requested:", req.payload);
@@ -51,8 +55,6 @@ const device = new RelayDevice({
   mode: "production", // 'production' | 'test'
 });
 ```
-
-The `api_key` is a NATS JWT that encodes your `orgId` and `deviceId`. These are extracted automatically on connect.
 
 ## Functionality
 
@@ -122,7 +124,7 @@ await device.command.off("firmware_update");
 
 ### Config
 
-Get and set device configuration via request/reply.
+Get and set device configuration
 
 ```js
 // Fetch current config
@@ -143,6 +145,28 @@ await device.event.send("door_opened", {
   timestamp: Date.now(),
 });
 ```
+
+### Logs
+
+Structured device logging with three levels (`info`, `warn`, `error`). Each
+call accepts a variadic argument list — strings, numbers, booleans, plain
+objects, arrays, dates, `null`/`undefined`, and `Error` instances are all
+accepted; functions and other non-serializable values throw `ValidationError`.
+
+```js
+device.log.info("hello world");
+device.log.info("a number reading", 42);
+device.log.warn("careful — disk usage at 87%");
+device.log.error("parse failed", new SyntaxError("bad json"));
+device.log.info("an object", { port: 8080, retries: 3 });
+```
+
+Locally, each call also mirrors to `console.info` / `console.warn` /
+`console.error` so you keep your normal dev experience.
+
+**Batching.** Entries are buffered in memory and flushed to the backend either
+when 15 entries accumulate or after 5 seconds, whichever comes first.
+`disconnect()` flushes any pending buffer.
 
 ### Time
 
@@ -181,6 +205,7 @@ import {
 ## Offline Behavior
 
 - **Telemetry & Events** (`publish`): Messages are buffered in memory while disconnected and flushed automatically on reconnect.
+- **Logs** (`device.log.*`): Entries are buffered and flushed on the same 15-entry / 5-second policy. Any buffer left at `disconnect()` is flushed before the connection drains.
 - **RPC & Commands** (`listen`): Throw `NotConnectedError` if transport is disconnected.
 - **Config** (`get`/`set`): Throw `NotConnectedError` if transport is disconnected.
 
