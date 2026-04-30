@@ -55,6 +55,7 @@ export class LogManager {
   #buffer = [];
   #timer = null;
   #inFlight = new Set();
+  #lastTimestamp = 0;
 
   constructor(transport, time) {
     this.#transport = transport;
@@ -80,9 +81,16 @@ export class LogManager {
     else if (type === "warn") console.warn(...args);
     else console.error(...args);
 
+    // Monotonic ms timestamp — Influx upserts on (measurement, tags, _field, _time),
+    // so back-to-back logs in the same ms would overwrite each other. Force strictly
+    // increasing timestamps within the device.
+    const now = this.#time.now();
+    const ts = now > this.#lastTimestamp ? now : this.#lastTimestamp + 1;
+    this.#lastTimestamp = ts;
+
     this.#buffer.push({
       type,
-      timestamp: this.#time.now(),
+      timestamp: ts,
       data: formatArgs(args),
     });
 
