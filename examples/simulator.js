@@ -95,8 +95,8 @@ async function main() {
     const humidity = +getHumidity(elapsed).toFixed(2);
 
     const [tempOk, humOk] = await Promise.all([
-      // device.telemetry.publish("temperature", temperature),
-      device.telemetry.publish("humidity", humidity),
+      device.telemetry.publish("temperature", temperature),
+      // device.telemetry.publish("humidity", humidity),
     ]);
 
     const t = elapsed % TOTAL_CYCLE;
@@ -119,7 +119,7 @@ async function main() {
     );
 
     // await device.event.send("reboot_device", {
-    //   "hey": "world"
+    //   "hey": "world" + tick
     // })
 
     tick++;
